@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mots croisés</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F5F0E8;
+  --parchment: #EDE4D0;
+  --ink: #1A1209;
+  --brown-dark: #3D2B1F;
+  --brown-mid: #6B4226;
+  --amber: #C17D3C;
+  --amber-light: #E8A84C;
+  --forest: #2D4A2D;
+  --sage: #5C7A5C;
+  --terra: #8B4513;
+  --gold: #B8942A;
+  --cell-size: 34px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: var(--cream);
+  color: var(--ink);
+  font-family: 'Crimson Pro', Georgia, serif;
+  min-height: 100vh;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(ellipse at 15% 10%, rgba(193,125,60,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 90%, rgba(45,74,45,0.07) 0%, transparent 50%);
+  pointer-events: none; z-index: 0;
+}
+.bg-animal {
+  position: fixed; opacity: 0.045; pointer-events: none; z-index: 0;
+}
+.bg-animal.tl { top:-20px; left:-20px; width:260px; transform:rotate(-10deg); }
+.bg-animal.br { bottom:-20px; right:-20px; width:240px; transform:rotate(170deg); }
+
+header {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 2rem 2rem 1.2rem;
+  border-bottom: 1px solid rgba(61,43,31,0.15);
+}
+.header-animals { font-size:1.8rem; letter-spacing:.5em; margin-bottom:.4rem; color:var(--amber); }
+header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem,4vw,2.8rem);
+  font-weight: 900; color: var(--brown-dark); line-height:1.1;
+}
+header h1 em { font-style:italic; color:var(--forest); }
+header p { font-size:1rem; color:var(--brown-mid); font-style:italic; margin-top:.3rem; }
+.rule { display:flex; align-items:center; gap:.8rem; margin-top:.8rem; justify-content:center; }
+.rule span { width:70px; height:1px; background:var(--amber); display:block; }
+
+.layout {
+  position: relative; z-index: 1;
+  display: flex; gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.grid-panel { flex: 0 0 auto; }
+.panel-label {
+  font-family:'Playfair Display',serif; font-size:.7rem; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--brown-mid);
+  margin-bottom:.6rem; display:flex; align-items:center; gap:.5rem;
+}
+.panel-label::after { content:''; flex:1; height:1px; background:rgba(61,43,31,0.2); }
+
+.toolbar { display:flex; gap:.4rem; margin-bottom:.8rem; flex-wrap:wrap; align-items:center; }
+.btn {
+  font-family:'Playfair Display',serif; font-size:.72rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase;
+  padding:.4rem 1rem; border:1.5px solid var(--brown-dark);
+  background:transparent; color:var(--brown-dark); cursor:pointer;
+  transition:all .2s; border-radius:2px;
+}
+.btn:hover { background:var(--brown-dark); color:var(--cream); }
+.btn.reveal { border-color:var(--forest); color:var(--forest); }
+.btn.reveal:hover { background:var(--forest); color:var(--cream); }
+.btn.clear { border-color:var(--terra); color:var(--terra); }
+.btn.clear:hover { background:var(--terra); color:var(--cream); }
+.btn.pdf-btn { border-color:var(--gold); color:var(--gold); text-decoration:none; display:inline-flex; align-items:center; }
+.btn.pdf-btn:hover { background:var(--gold); color:var(--cream); }
+#msg { font-style:italic; font-size:.88rem; color:var(--forest); padding-left:.5rem; }
+
+.grid-wrap { overflow:auto; }
+table#grid {
+  border-collapse: collapse;
+  border: 2px solid var(--brown-dark);
+  box-shadow: 3px 3px 0 rgba(61,43,31,0.12), 7px 7px 0 rgba(61,43,31,0.05);
+}
+table#grid td {
+  width:var(--cell-size); height:var(--cell-size);
+  background:var(--brown-dark); padding:0; position:relative;
+}
+table#grid td.cell {
+  background:var(--cream);
+  border:1px solid rgba(61,43,31,0.3);
+  transition:background .12s;
+}
+table#grid td.cell.word-hl { background:#EAE1CC; }
+table#grid td.cell.cell-active { background:var(--amber-light) !important; }
+table#grid td.cell.ok { background:#D4E8C8; }
+table#grid td.cell.err { background:#F0C8C8; }
+table#grid td.cell input {
+  position:absolute; inset:0; width:100%; height:100%;
+  border:none; background:transparent;
+  text-align:center;
+  font-family:'Playfair Display',serif;
+  font-size:14px; font-weight:700; color:var(--brown-dark);
+  text-transform:uppercase; cursor:pointer; outline:none;
+  caret-color:transparent; padding-top:5px;
+}
+.num {
+  position:absolute; top:1px; left:2px;
+  font-size:7.5px; line-height:1;
+  font-family:'Crimson Pro',serif; font-weight:600;
+  color:var(--brown-mid); pointer-events:none; z-index:2;
+}
+
+.clues-panel { flex:1; min-width:260px; max-width:480px; }
+.clue-section { margin-bottom:1.2rem; }
+.clue-section h3 {
+  font-family:'Playfair Display',serif; font-size:.68rem; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--cream); background:var(--brown-dark);
+  padding:.35rem .75rem; margin-bottom:.5rem; display:inline-block;
+}
+.clue {
+  display:flex; gap:7px; padding:4px 5px; border-radius:2px;
+  cursor:pointer; transition:background .12s; margin-bottom:1px;
+  border-left:2px solid transparent;
+}
+.clue:hover { background:rgba(61,43,31,0.05); }
+.clue.active { background:rgba(193,125,60,0.1); border-left-color:var(--amber); }
+.clue-num { font-family:'Playfair Display',serif; font-size:.8rem; font-weight:700; color:var(--amber); min-width:20px; text-align:right; flex-shrink:0; padding-top:1px; }
+.clue-text { font-size:.88rem; color:var(--ink); line-height:1.35; }
+
+.score { margin-top:.8rem; padding:.6rem .9rem; border:1px solid rgba(61,43,31,0.18); background:rgba(255,255,255,0.35); font-style:italic; font-size:.88rem; color:var(--brown-mid); text-align:center; display:none; }
+
+footer { position:relative; z-index:1; text-align:center; padding:1.2rem; border-top:1px solid rgba(61,43,31,0.1); font-size:.8rem; color:var(--brown-mid); font-style:italic; }
+
+@media(max-width:900px){ .layout{flex-direction:column;} .clues-panel{max-width:100%;} }
+</style>
+</head>
+<body>
+
+<svg class="bg-animal tl" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <path d="M100 25C62 25 32 55 32 93c0 38 30 68 68 68s68-30 68-68c0-38-30-68-68-68z" fill="#3D2B1F"/>
+  <circle cx="78" cy="14" r="13" fill="#3D2B1F"/><circle cx="122" cy="14" r="13" fill="#3D2B1F"/>
+  <ellipse cx="78" cy="87" rx="9" ry="13" fill="#F5F0E8"/><ellipse cx="122" cy="87" rx="9" ry="13" fill="#F5F0E8"/>
+  <ellipse cx="79" cy="88" rx="4.5" ry="6.5" fill="#1A1209"/><ellipse cx="121" cy="88" rx="4.5" ry="6.5" fill="#1A1209"/>
+  <ellipse cx="100" cy="108" rx="7" ry="6" fill="#C17D3C"/>
+  <path d="M76 122 Q100 136 124 122" stroke="#1A1209" stroke-width="2.5" fill="none"/>
+  <line x1="52" y1="98" x2="22" y2="93" stroke="#3D2B1F" stroke-width="1.8"/>
+  <line x1="52" y1="106" x2="20" y2="108" stroke="#3D2B1F" stroke-width="1.8"/>
+  <line x1="148" y1="98" x2="178" y2="93" stroke="#3D2B1F" stroke-width="1.8"/>
+  <line x1="148" y1="106" x2="180" y2="108" stroke="#3D2B1F" stroke-width="1.8"/>
+</svg>
+
+<svg class="bg-animal br" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <path d="M100 25C62 25 32 55 32 93c0 38 30 68 68 68s68-30 68-68c0-38-30-68-68-68z" fill="#2D4A2D"/>
+  <circle cx="78" cy="14" r="13" fill="#2D4A2D"/><circle cx="122" cy="14" r="13" fill="#2D4A2D"/>
+  <ellipse cx="78" cy="87" rx="9" ry="13" fill="#F5F0E8"/><ellipse cx="122" cy="87" rx="9" ry="13" fill="#F5F0E8"/>
+  <ellipse cx="79" cy="88" rx="4.5" ry="6.5" fill="#1A1209"/><ellipse cx="121" cy="88" rx="4.5" ry="6.5" fill="#1A1209"/>
+  <ellipse cx="100" cy="108" rx="7" ry="6" fill="#5C7A5C"/>
+  <path d="M76 122 Q100 136 124 122" stroke="#1A1209" stroke-width="2.5" fill="none"/>
+</svg>
+
+<header>
+  <h1>Le Monde <em>animal</em></h1>
+</header>
+
+<div class="layout">
+  <div class="grid-panel">
+    <div class="panel-label">Grille</div>
+    <div class="toolbar">
+      <button class="btn" onclick="checkAll()">✓ Vérifier</button>
+      <button class="btn reveal" onclick="revealAll()">Révéler</button>
+      <button class="btn clear" onclick="clearAll()">Effacer</button>
+      <a class="btn pdf-btn" href="crossword.pdf" target="_blank">⬇ Imprimer</a>
+      <span id="msg"></span>
+    </div>
+    <div class="grid-wrap"><table id="grid"></table></div>
+    <div class="score" id="score"></div>
+  </div>
+  <div class="clues-panel">
+    <div class="clue-section"><h3>→ Horizontalement</h3><div id="across"></div></div>
+    <div class="clue-section"><h3>↓ Verticalement</h3><div id="down"></div></div>
+  </div>
+</div>
+
+
+<script>
+const ALL_WORDS = [
+  {w:"BESTIALITE",        d:"across", r:1,  c:5 },
+  {w:"ANTHROPOMORPHISME", d:"across", r:8,  c:1 },
+  {w:"CARTESIENNE",       d:"across", r:15, c:0 },
+  {w:"AMBIVALENCE",       d:"down",   r:3,  c:1 },
+  {w:"SENTIENCE",         d:"down",   r:5,  c:3 },
+  {w:"BESTIAIRE",         d:"down",   r:1,  c:5 },
+  {w:"POROSITE",          d:"down",   r:8,  c:7 },
+  {w:"ANIMALITE",         d:"down",   r:5,  c:9 },
+  {w:"ZOOMORPHISME",      d:"down",   r:3,  c:11},
+  {w:"ETHOLOGUE",         d:"down",   r:6,  c:13},
+  {w:"REPOUSSOIR",        d:"down",   r:3,  c:15},
+  {w:"GASSENDISTES",      d:"down",   r:4,  c:17},
+];
+
+const DEFS = {
+  "BESTIALITE":        "Qui ressemble à la bête par son physique, son comportement, ses penchants.",
+  "ANTHROPOMORPHISME": "Attribution de caractéristiques du comportement ou de la morphologie humaine à d'autres entités (dieux, animaux, objets, phénomènes, idées).",
+  "CARTESIENNE":       "Qui présente les caractères rationnels, rigoureux et méthodiques propres à la démarche intellectuelle de Descartes.",
+  "BESTIAIRE":         "Ensemble de l'iconographie animalière.",
+  "AMBIVALENCE":       "Caractère de ce qui comporte deux composantes de sens contraire, ou de ce qui se présente sous deux aspects.",
+  "ZOOMORPHISME":      "Fait de représenter ou de se représenter quelque chose sous une forme animale.",
+  "REPOUSSOIR":        "Chose ou personne qui en fait valoir une autre par contraste.",
+  "GASSENDISTES":      "Relatif à Pierre Gassendi, philosophe français (1592-1655).",
+  "SENTIENCE":         "Capacité d'être sensible ou d'avoir une sensibilité animale.",
+  "ANIMALITE":         "Ensemble des caractères des attributs propres à l'animal par opposition aux facultés humaines.",
+  "ETHOLOGUE":         "Personne qui étudie le comportement des animaux.",
+  "POROSITE":          "Absence de délimitation claire entre deux domaines, deux milieux.",
+};
+
+let ROWS=0, COLS=0;
+ALL_WORDS.forEach(({w,d,r,c})=>{
+  if(d==="across"){ROWS=Math.max(ROWS,r+1);COLS=Math.max(COLS,c+w.length);}
+  else{ROWS=Math.max(ROWS,r+w.length);COLS=Math.max(COLS,c+1);}
+});
+ROWS+=1; COLS+=1;
+
+const grid=Array.from({length:ROWS},()=>Array.from({length:COLS},()=>({letter:"",active:false,words:[]})));
+ALL_WORDS.forEach(({w,d,r,c},wi)=>{
+  for(let i=0;i<w.length;i++){
+    const rr=d==="across"?r:r+i, cc=d==="across"?c+i:c;
+    grid[rr][cc].letter=w[i]; grid[rr][cc].active=true;
+    if(!grid[rr][cc].words.includes(wi)) grid[rr][cc].words.push(wi);
+  }
+});
+
+// Numbering
+const nums={}, numMap={};
+let n=1;
+for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+  if(!grid[r][c].active) continue;
+  const sA=ALL_WORDS.findIndex(({d,r:wr,c:wc})=>d==="across"&&wr===r&&wc===c);
+  const sD=ALL_WORDS.findIndex(({d,r:wr,c:wc})=>d==="down"&&wr===r&&wc===c);
+  if(sA>=0||sD>=0){
+    nums[r+","+c]=n;
+    if(sA>=0) numMap["A"+sA]=n;
+    if(sD>=0) numMap["D"+sD]=n;
+    n++;
+  }
+}
+
+const tbl=document.getElementById("grid");
+const INP=[];
+let selWord=null, selCell=null;
+
+for(let r=0;r<ROWS;r++){
+  const tr=document.createElement("tr");
+  INP[r]=[];
+  for(let c=0;c<COLS;c++){
+    const td=document.createElement("td");
+    if(grid[r][c].active){
+      td.className="cell";
+      const num=nums[r+","+c];
+      if(num){const sp=document.createElement("span");sp.className="num";sp.textContent=num;td.appendChild(sp);}
+      const inp=document.createElement("input");
+      inp.maxLength=1; inp.dataset.r=r; inp.dataset.c=c;
+      inp.addEventListener("focus",()=>onFocus(r,c));
+      inp.addEventListener("input",e=>onInput(e,r,c));
+      inp.addEventListener("keydown",e=>onKey(e,r,c));
+      td.appendChild(inp); INP[r][c]=inp;
+    }
+    tr.appendChild(td);
+  }
+  tbl.appendChild(tr);
+}
+
+function onFocus(r,c){
+  if(selCell&&selCell[0]===r&&selCell[1]===c){
+    const ws=grid[r][c].words;
+    if(ws.length>1){ selWord=ws.find(wi=>wi!==selWord)??ws[0]; hl(); hlClue(); return; }
+  }
+  selCell=[r,c];
+  const ws=grid[r][c].words;
+  if(ws.length>0&&(selWord===null||!ws.includes(selWord))) selWord=ws[0];
+  hl(); hlClue();
+}
+
+function hl(){
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    if(!grid[r][c].active) continue;
+    const td=INP[r][c].parentElement;
+    td.classList.remove("cell-active","word-hl");
+  }
+  if(selWord===null) return;
+  const {w,d,r,c}=ALL_WORDS[selWord];
+  for(let i=0;i<w.length;i++){
+    const rr=d==="across"?r:r+i, cc=d==="across"?c+i:c;
+    INP[rr][cc].parentElement.classList.add("word-hl");
+  }
+  if(selCell){ const [r,c]=selCell; if(INP[r]?.[c]) INP[r][c].parentElement.classList.add("cell-active"); }
+}
+
+function hlClue(){
+  document.querySelectorAll(".clue").forEach(el=>el.classList.remove("active"));
+  if(selWord===null) return;
+  const el=document.querySelector(`.clue[data-wi="${selWord}"]`);
+  if(el){ el.classList.add("active"); el.scrollIntoView({block:"nearest"}); }
+}
+
+function moveNext(r,c){
+  if(selWord===null) return;
+  const {w,d,r:wr,c:wc}=ALL_WORDS[selWord];
+  if(d==="across"){ if(c+1<wc+w.length&&INP[r]?.[c+1]) INP[r][c+1].focus(); }
+  else { if(r+1<wr+w.length&&INP[r+1]?.[c]) INP[r+1][c].focus(); }
+}
+function movePrev(r,c){
+  if(selWord===null) return;
+  const {d,r:wr,c:wc}=ALL_WORDS[selWord];
+  if(d==="across"){ if(c-1>=wc&&INP[r]?.[c-1]) INP[r][c-1].focus(); }
+  else { if(r-1>=wr&&INP[r-1]?.[c]) INP[r-1][c].focus(); }
+}
+function moveGrid(r,c,dr,dc){
+  let nr=r+dr,nc=c+dc;
+  while(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS){
+    if(grid[nr][nc].active&&INP[nr]?.[nc]){ INP[nr][nc].focus(); return; }
+    nr+=dr; nc+=dc;
+  }
+}
+
+function onInput(e,r,c){
+  const v=e.target.value.toUpperCase().replace(/[^A-Z]/g,"");
+  e.target.value=v; if(v) moveNext(r,c);
+}
+function onKey(e,r,c){
+  if(e.key==="Backspace"&&!e.target.value) movePrev(r,c);
+  if(e.key==="ArrowRight"){e.preventDefault();moveGrid(r,c,0,1);}
+  if(e.key==="ArrowLeft"){e.preventDefault();moveGrid(r,c,0,-1);}
+  if(e.key==="ArrowDown"){e.preventDefault();moveGrid(r,c,1,0);}
+  if(e.key==="ArrowUp"){e.preventDefault();moveGrid(r,c,-1,0);}
+}
+
+// Clues
+const acrossDiv=document.getElementById("across"), downDiv=document.getElementById("down");
+ALL_WORDS.forEach(({w,d},wi)=>{
+  const dir=d==="across"?"A":"D";
+  const num=numMap[dir+wi];
+  const div=document.createElement("div");
+  div.className="clue"; div.dataset.wi=wi;
+  div.innerHTML=`<span class="clue-num">${num}.</span><span class="clue-text">${DEFS[w]||w}</span>`;
+  div.addEventListener("click",()=>{
+    const {r,c}=ALL_WORDS[wi];
+    selWord=wi; selCell=[r,c]; hl(); hlClue();
+    if(INP[r]?.[c]) INP[r][c].focus();
+  });
+  if(d==="across") acrossDiv.appendChild(div); else downDiv.appendChild(div);
+});
+
+function checkAll(){
+  let ok=0,tot=0;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    if(!grid[r][c].active||!INP[r]?.[c]) continue;
+    tot++;
+    const v=INP[r][c].value.toUpperCase();
+    const cor=grid[r][c].letter;
+    INP[r][c].parentElement.classList.remove("ok","err");
+    if(v===cor){INP[r][c].parentElement.classList.add("ok");ok++;}
+    else if(v) INP[r][c].parentElement.classList.add("err");
+  }
+  document.getElementById("msg").textContent=`${ok}/${tot} lettres correctes`;
+  const sc=document.getElementById("score");
+  sc.style.display="block";
+  sc.textContent=ok===tot?"🐾 Félicitations ! Grille complète !":`${ok} sur ${tot} — continuez !`;
+}
+function revealAll(){
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    if(!grid[r][c].active||!INP[r]?.[c]) continue;
+    INP[r][c].value=grid[r][c].letter;
+    INP[r][c].parentElement.classList.add("ok");
+    INP[r][c].parentElement.classList.remove("err");
+  }
+  const sc=document.getElementById("score"); sc.style.display="block"; sc.textContent="Solution révélée";
+}
+function clearAll(){
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    if(!grid[r][c].active||!INP[r]?.[c]) continue;
+    INP[r][c].value="";
+    INP[r][c].parentElement.classList.remove("ok","err");
+  }
+  document.getElementById("msg").textContent="";
+  document.getElementById("score").style.display="none";
+}
+</script>
+</body>
+</html>

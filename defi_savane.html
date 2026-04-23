@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Défi du jour</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sand: #F5E6C8;
+  --sand-dark: #E8D09A;
+  --terra: #C4622D;
+  --terra-light: #E8845A;
+  --leaf: #4A7C59;
+  --leaf-light: #6BA378;
+  --sky: #5B9BD5;
+  --sun: #F4A82E;
+  --sun-light: #F7C05A;
+  --bark: #7B4F2E;
+  --cream: #FFF8EC;
+  --text-dark: #2C1A0E;
+  --text-mid: #5C3D1E;
+  --text-light: #8B6040;
+  --correct: #3A7D44;
+  --correct-bg: #D6EDD9;
+  --wrong: #B0351A;
+  --wrong-bg: #F5D5CC;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background-color: var(--sand);
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(196,98,45,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(74,124,89,0.1) 0%, transparent 50%),
+    repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(232,208,154,0.3) 40px, rgba(232,208,154,0.3) 41px);
+  min-height: 100vh;
+  color: var(--text-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* HEADER */
+.header {
+  width: 100%;
+  background: linear-gradient(135deg, var(--terra) 0%, #A84E22 100%);
+  padding: 1.5rem 2rem 2rem;
+  text-align: center;
+  clip-path: ellipse(100% 88% at 50% 0%);
+  margin-bottom: 2rem;
+}
+.header-back {
+  position: absolute;
+  left: 1.25rem;
+  top: 1.1rem;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.35rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.header-back:hover { background: rgba(255,255,255,0.25); }
+.header-emoji { font-size: 2rem; letter-spacing: 0.5rem; margin-bottom: 0.4rem; animation: float 3s ease-in-out infinite; display: block; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.header h1 {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  color: #FFF8EC;
+  text-shadow: 2px 3px 0 rgba(0,0,0,0.2);
+  line-height: 1.1;
+}
+.header h1 span { color: var(--sun-light); }
+.header p { color: rgba(255,248,236,0.85); font-size: 0.9rem; font-weight: 600; margin-top: 0.3rem; }
+
+/* CARD WRAPPER */
+.card {
+  background: var(--cream);
+  border-radius: 24px;
+  box-shadow: 0 6px 24px rgba(44,26,14,0.12), 0 2px 6px rgba(44,26,14,0.07);
+  padding: 2rem 2rem 2.5rem;
+  max-width: 640px;
+  width: calc(100% - 2rem);
+  margin: 0 1rem 3rem;
+}
+
+/* ── START SCREEN ── */
+#screen-start { text-align: center; }
+.start-icon { font-size: 4.5rem; margin-bottom: 1rem; display: block; animation: sway 4s ease-in-out infinite; }
+@keyframes sway { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+.start-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+.start-desc { color: var(--text-light); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; }
+.tag-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 2rem; }
+.tag {
+  background: rgba(196,98,45,0.1);
+  color: var(--terra);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.btn-main {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--terra), var(--terra-light));
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  padding: 0.75rem 2.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(196,98,45,0.35);
+  transition: transform 0.15s, filter 0.15s;
+}
+.btn-main:hover { transform: translateY(-2px); filter: brightness(1.07); }
+.btn-main:active { transform: scale(0.97); }
+.btn-secondary {
+  display: inline-block;
+  background: transparent;
+  color: var(--terra);
+  border: 2px solid var(--terra);
+  border-radius: 30px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-top: 0.75rem;
+}
+.btn-secondary:hover { background: var(--terra); color: white; }
+
+/* ── QUIZ SCREEN ── */
+#screen-quiz { display: none; }
+.quiz-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+.progress-pills { display: flex; gap: 4px; }
+.pill {
+  width: 20px; height: 6px; border-radius: 10px;
+  background: var(--sand-dark);
+  transition: background 0.3s;
+}
+.pill.done { background: var(--leaf); }
+.pill.current { background: var(--terra); }
+.score-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-light);
+}
+.score-badge span { color: var(--terra); font-size: 1rem; }
+
+.question-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 0.6rem;
+}
+.question-label {
+  display: inline-block;
+  background: rgba(196,98,45,0.1);
+  color: var(--terra);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-bottom: 0.75rem;
+}
+.question-text {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.choices { display: flex; flex-direction: column; gap: 0.65rem; }
+.choice-btn {
+  background: white;
+  border: 2px solid var(--sand-dark);
+  border-radius: 14px;
+  padding: 0.75rem 1.1rem;
+  text-align: left;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.choice-btn:hover:not(:disabled) { border-color: var(--terra); background: rgba(196,98,45,0.04); transform: translateX(3px); }
+.choice-btn:disabled { cursor: default; transform: none; }
+.choice-btn.correct { border-color: var(--correct); background: var(--correct-bg); color: var(--correct); }
+.choice-btn.wrong { border-color: var(--wrong); background: var(--wrong-bg); color: var(--wrong); }
+.choice-letter {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--sand-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.choice-btn.correct .choice-letter { background: var(--correct); color: white; }
+.choice-btn.wrong .choice-letter { background: var(--wrong); color: white; }
+
+/* FEEDBACK */
+.feedback {
+  margin-top: 1.2rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  display: none;
+}
+.feedback.correct { background: var(--correct-bg); color: var(--correct); border-left: 4px solid var(--correct); }
+.feedback.wrong { background: var(--wrong-bg); color: var(--wrong); border-left: 4px solid var(--wrong); }
+.feedback-head { font-weight: 800; font-size: 0.95rem; margin-bottom: 0.25rem; }
+.feedback-expl { color: var(--text-mid); }
+
+.btn-next {
+  margin-top: 1.25rem;
+  width: 100%;
+  display: none;
+}
+
+/* ── RESULT SCREEN ── */
+#screen-result { display: none; text-align: center; }
+.result-icon { font-size: 4rem; margin-bottom: 0.75rem; display: block; }
+.result-title { font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 1.7rem; color: var(--text-dark); margin-bottom: 0.4rem; }
+.result-sub { color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.stars-row { display: flex; justify-content: center; gap: 0.5rem; font-size: 2.2rem; margin-bottom: 1.5rem; }
+.score-circle {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--terra), var(--terra-light));
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  margin: 0 auto 1.75rem;
+  box-shadow: 0 6px 20px rgba(196,98,45,0.3);
+  color: white;
+}
+.score-circle .big { font-family: 'Baloo 2', cursive; font-size: 2.2rem; font-weight: 800; line-height: 1; }
+.score-circle .small { font-size: 0.75rem; font-weight: 700; opacity: 0.85; }
+.result-breakdown {
+  background: rgba(232,208,154,0.3);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+.breakdown-title { font-weight: 800; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-light); margin-bottom: 0.6rem; }
+.breakdown-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; padding: 3px 0; color: var(--text-mid); }
+.breakdown-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.result-btns { display: flex; flex-direction: column; gap: 0.6rem; }
+
+/* UTIL */
+.hidden { display: none !important; }
+.relative { position: relative; }
+</style>
+</head>
+<body>
+
+<div class="header" style="position:relative;">
+  <button class="header-back" onclick="location.href='animal_games_hub.html'">← Accueil</button>
+  <span class="header-emoji">🦁 🐘 🦜</span>
+  <h1>Défi <span>du jour!</span></h1>
+  <p>Les animaux et nous — culture, philosophie, éthologie</p>
+</div>
+
+<!-- START -->
+<div class="card" id="screen-start">
+  <span class="start-icon">🏆</span>
+  <div class="start-title">Défi du jour</div>
+  <p class="start-desc">
+    10 questions tirées au sort sur la relation entre l'humain et l'animal :
+    philosophie, éthologie, histoire et grands noms qui ont changé notre regard sur le monde animal.
+  </p>
+  <div class="tag-row">
+    <span class="tag">Philosophie</span>
+    <span class="tag">Éthologie</span>
+    <span class="tag">Histoire</span>
+    <span class="tag">Concepts</span>
+    <span class="tag">Figures marquantes</span>
+  </div>
+  <button class="btn-main" onclick="startGame()">Commencer le défi ▶</button>
+</div>
+
+<!-- QUIZ -->
+<div class="card" id="screen-quiz">
+  <div class="quiz-meta">
+    <div class="progress-pills" id="pills"></div>
+    <div class="score-badge">Score : <span id="live-score">0</span></div>
+  </div>
+  <div class="question-label" id="q-category"></div>
+  <div class="question-num" id="q-num"></div>
+  <div class="question-text" id="q-text"></div>
+  <div class="choices" id="choices"></div>
+  <div class="feedback" id="feedback">
+    <div class="feedback-head" id="fb-head"></div>
+    <div class="feedback-expl" id="fb-expl"></div>
+  </div>
+  <button class="btn-main btn-next" id="btn-next" onclick="nextQuestion()">Question suivante →</button>
+</div>
+
+<!-- RESULT -->
+<div class="card" id="screen-result">
+  <span class="result-icon" id="result-icon"></span>
+  <div class="result-title" id="result-title"></div>
+  <div class="result-sub" id="result-sub"></div>
+  <div class="stars-row" id="result-stars"></div>
+  <div class="score-circle">
+    <span class="big" id="result-score"></span>
+    <span class="small">/ 10</span>
+  </div>
+  <div class="result-breakdown">
+    <div class="breakdown-title">Récapitulatif</div>
+    <div id="breakdown-list"></div>
+  </div>
+  <div class="result-btns">
+    <button class="btn-main" onclick="startGame()">Rejouer 🔁</button>
+    <button class="btn-secondary" onclick="location.href='animal_games_hub.html'">← Retour à la Savane</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  // ── Concepts philosophiques ──
+  {
+    cat: "Philosophie",
+    q: "Comment appelle-t-on le fait d'attribuer des caractéristiques humaines (émotions, intentions) à des animaux ou des objets ?",
+    choices: ["Zoomorphisme", "Anthropomorphisme", "Animisme", "Naturalisme"],
+    answer: 1,
+    expl: "L'anthropomorphisme projette des traits humains sur le non-humain. C'est un biais cognitif naturel, mais aussi un outil littéraire et philosophique majeur."
+  },
+  {
+    cat: "Philosophie",
+    q: "Quel concept désigne la capacité d'un être à éprouver des expériences subjectives — plaisir, douleur, émotions ?",
+    choices: ["Conscience", "Sentience", "Sapience", "Résilience"],
+    answer: 1,
+    expl: "La sentience est centrale dans l'éthique animale contemporaine : un être sentient mérite une considération morale. Peter Singer l'a popularisée dans 'La Libération animale' (1975)."
+  },
+  {
+    cat: "Philosophie",
+    q: "Pour Descartes, les animaux étaient assimilables à quoi ?",
+    choices: ["Des êtres doués de raison", "Des machines sans âme", "Des esprits de la nature", "Des membres de la société"],
+    answer: 1,
+    expl: "Dans le 'Discours de la méthode' (1637), Descartes décrit les animaux comme des automates — 'animaux-machines' — incapables de pensée et dépourvus d'âme."
+  },
+  {
+    cat: "Philosophie",
+    q: "Quel philosophe du XVIIe siècle s'opposait à Descartes en accordant une âme sensible aux animaux ?",
+    choices: ["Spinoza", "Locke", "Gassendi", "Voltaire"],
+    answer: 2,
+    expl: "Pierre Gassendi (1592–1655) défendait que les animaux possèdent une âme sensible et matérielle. Ses partisans — les gassendistes — maintenaient que la sensibilité animale était réelle et non simulée."
+  },
+  {
+    cat: "Philosophie",
+    q: "Qu'est-ce que le zoomorphisme ?",
+    choices: ["L'étude scientifique des animaux", "La représentation d'un humain ou d'un dieu sous forme animale", "La peur irrationnelle des animaux", "La classification des espèces"],
+    answer: 1,
+    expl: "Le zoomorphisme est l'inverse de l'anthropomorphisme : on attribue des formes ou attributs animaux à des humains ou des divinités. On le retrouve dans de nombreuses mythologies (Zeus en aigle, Anubis à tête de chacal)."
+  },
+  {
+    cat: "Philosophie",
+    q: "Comment nomme-t-on le sentiment mêlant effroi et attirance irrésistible que peut susciter un animal sauvage ?",
+    choices: ["Ambivalence", "Répulsion", "Fascination", "Sublimation"],
+    answer: 2,
+    expl: "La fascination désigne cette tension paradoxale entre la peur et le désir d'approche. Elle structure une grande partie de la relation symbolique entre l'humain et le prédateur ou la bête sauvage."
+  },
+  {
+    cat: "Philosophie",
+    q: "Quel terme désigne l'utilisation de l'animal comme 'miroir négatif' de l'humain — ce que l'on ne veut pas être ?",
+    choices: ["Repoussoir", "Totem", "Chimère", "Talisman"],
+    answer: 0,
+    expl: "L'animal comme repoussoir sert à définir l'humain par contraste : la 'bestialité' ou la 'brutalité' désignent ce dont l'humain civilisé cherche à se distinguer."
+  },
+  {
+    cat: "Philosophie",
+    q: "Qu'est-ce que l'animalité, en philosophie ?",
+    choices: ["La capacité à se reproduire", "L'ensemble des attributs propres à l'animal par opposition aux facultés humaines", "Le comportement instinctif de l'humain en société", "La communication entre espèces"],
+    answer: 1,
+    expl: "L'animalité désigne ce qui appartient en propre à l'animal : instinct, corps, sensations — par opposition à la raison, au langage ou à la culture, souvent définis comme strictement humains."
+  },
+  {
+    cat: "Philosophie",
+    q: "Comment appelle-t-on l'absence de frontière nette entre deux catégories — par exemple entre 'humain' et 'animal' ?",
+    choices: ["Dualisme", "Porosité", "Hybridation", "Dialectique"],
+    answer: 1,
+    expl: "La porosité conceptuelle remet en question les grandes dichotomies (nature/culture, humain/animal). Les travaux de Donna Haraway ou de Philippe Descola illustrent cette remise en cause."
+  },
+  // ── Éthologie & Science ──
+  {
+    cat: "Éthologie",
+    q: "Quel terme désigne le spécialiste qui étudie le comportement animal en milieu naturel ou en captivité ?",
+    choices: ["Zoologiste", "Vétérinaire", "Éthologue", "Naturaliste"],
+    answer: 2,
+    expl: "L'éthologie (du grec èthos, 'mœurs') est la science du comportement animal. Konrad Lorenz et Nikolaas Tinbergen ont fondé la discipline moderne, récompensés par le Nobel en 1973."
+  },
+  {
+    cat: "Éthologie",
+    q: "Konrad Lorenz est notamment célèbre pour avoir décrit quel phénomène comportemental chez les oiseaux ?",
+    choices: ["La migration saisonnière", "L'empreinte (imprinting)", "La communication par ultrasons", "Le camouflage instinctif"],
+    answer: 1,
+    expl: "L'empreinte est un apprentissage précoce irréversible : juste après l'éclosion, un oisillon s'attache au premier objet mobile qu'il voit comme à sa mère. Lorenz en a fait une démonstration célèbre avec des oies cendrées."
+  },
+  {
+    cat: "Éthologie",
+    q: "Quelle primatologue a consacré plus de 60 ans à l'étude des chimpanzés dans la forêt de Gombe, en Tanzanie ?",
+    choices: ["Dian Fossey", "Jane Goodall", "Birutė Galdikas", "Françoise Wemelsfelder"],
+    answer: 1,
+    expl: "Jane Goodall (née en 1934) a révélé que les chimpanzés fabriquent et utilisent des outils, remettant en cause la définition même de l'être humain. Elle est aujourd'hui une figure majeure de la conservation."
+  },
+  {
+    cat: "Éthologie",
+    q: "Dian Fossey est célèbre pour ses recherches sur quel animal en voie d'extinction ?",
+    choices: ["L'éléphant d'Afrique", "Le gorille de montagne", "Le tigre du Bengale", "L'orangutan de Bornéo"],
+    answer: 1,
+    expl: "Dian Fossey (1932–1985) a étudié les gorilles de montagne au Rwanda pendant près de 20 ans. Son travail a inspiré le film 'Gorilles dans la brume'. Elle a été assassinée, probablement par des braconniers."
+  },
+  {
+    cat: "Éthologie",
+    q: "Qu'est-ce qu'un bestiaire, dans la culture médiévale ?",
+    choices: ["Un zoo royal", "Un traité de chasse", "Un recueil illustré d'animaux réels et imaginaires", "Un ordre de chevalerie"],
+    answer: 2,
+    expl: "Les bestiaires médiévaux décrivaient des animaux (réels ou fabuleux) en leur associant des significations morales ou religieuses. Ils témoignent de l'imaginaire symbolique que l'humain projette sur l'animal."
+  },
+  {
+    cat: "Éthologie",
+    q: "Qu'est-ce que la domestication, dans le sens le plus strict ?",
+    choices: ["Apprivoiser un animal sauvage adulte", "Le processus multigénérationnel par lequel une espèce sauvage est transformée sous contrôle humain", "Dresser un animal pour le spectacle", "Élever des animaux en enclos"],
+    answer: 1,
+    expl: "La domestication est un processus évolutif sur des générations : l'humain sélectionne des individus aux caractères utiles (docilité, production, comportement). Le chien est la première espèce domestiquée, il y a environ 15 000 ans."
+  },
+  // ── Histoire & Culture ──
+  {
+    cat: "Histoire & Culture",
+    q: "Comment appelle-t-on les représentations d'animaux peintes ou gravées dans les grottes préhistoriques ?",
+    choices: ["Art rupestre", "Art pariétal", "Art totémique", "Art chamanique"],
+    answer: 1,
+    expl: "L'art pariétal (du latin paries, 'paroi') désigne les œuvres réalisées sur les parois de grottes. Lascaux, Chauvet ou Altamira en sont les exemples les plus célèbres, témoignant d'un lien ancien et fort entre humain et animal."
+  },
+  {
+    cat: "Histoire & Culture",
+    q: "Quelle convention internationale réglemente le commerce des espèces sauvages menacées d'extinction ?",
+    choices: ["La convention de Kyoto", "La CITES", "Le protocole de Nagoya", "La convention de Ramsar"],
+    answer: 1,
+    expl: "La CITES (Convention sur le commerce international des espèces de faune et de flore sauvages menacées d'extinction), signée en 1963, contrôle le commerce de plus de 38 000 espèces."
+  },
+  {
+    cat: "Histoire & Culture",
+    q: "Quel philosophe utilitariste a popularisé l'idée que la capacité à souffrir, et non la raison, fonde le droit à la considération morale — y compris pour les animaux ?",
+    choices: ["Emmanuel Kant", "John Stuart Mill", "Peter Singer", "John Rawls"],
+    answer: 2,
+    expl: "Peter Singer, dans 'La Libération animale' (1975), s'appuie sur Jeremy Bentham : 'La question n'est pas : peuvent-ils raisonner ? Ni : peuvent-ils parler ? Mais : peuvent-ils souffrir ?'"
+  },
+  {
+    cat: "Histoire & Culture",
+    q: "Comment s'appelle le mouvement intellectuel du XVIIIe siècle qui a commencé à questionner la cruauté envers les animaux au nom de la raison et de la sensibilité ?",
+    choices: ["Le romantisme", "Les Lumières", "Le positivisme", "Le naturalisme"],
+    answer: 1,
+    expl: "Les Lumières ont posé les bases de la réflexion morale sur les animaux. Voltaire, Rousseau ou Buffon ont contribué, chacun à sa façon, à reconsidérer la place de l'animal dans l'ordre naturel et moral."
+  },
+  {
+    cat: "Histoire & Culture",
+    q: "Dans la mythologie égyptienne, quelle divinité possède un corps humain et une tête de chacal ?",
+    choices: ["Horus", "Osiris", "Anubis", "Thot"],
+    answer: 2,
+    expl: "Anubis est le dieu de la mort et de l'embaumement, représenté avec une tête de chacal. Sa forme zoomorphe illustre comment les civilisations anciennes utilisaient l'animal comme langage symbolique du divin."
+  },
+  // ── Concepts avancés ──
+  {
+    cat: "Concepts",
+    q: "Le terme 'écocentrisme' désigne quelle approche éthique ?",
+    choices: ["La protection exclusive des animaux domestiques", "Une éthique centrée sur l'ensemble des écosystèmes et du vivant", "Le refus de toute intervention humaine dans la nature", "L'étude des comportements en milieu urbain"],
+    answer: 1,
+    expl: "L'écocentrisme, défendu notamment par Aldo Leopold ('A Sand County Almanac', 1949), étend la considération morale à l'ensemble du vivant et des écosystèmes, et non aux seuls individus."
+  },
+  {
+    cat: "Concepts",
+    q: "Que désigne le concept de 'bien-être animal' (animal welfare) ?",
+    choices: ["Le droit des animaux à vivre en liberté totale", "L'état physique et mental d'un animal dans ses conditions de vie", "L'interdiction de toute utilisation des animaux", "La personnalité juridique accordée aux animaux"],
+    answer: 1,
+    expl: "Le bien-être animal est évalué à travers les 'Cinq libertés' (définies en 1965 au Royaume-Uni) : absence de faim, de douleur, de maladie, de peur et liberté d'expression des comportements naturels."
+  },
+  {
+    cat: "Concepts",
+    q: "Comment appelle-t-on la discipline qui étudie les relations entre les humains, les animaux et l'environnement de manière intégrée ?",
+    choices: ["L'anthropologie culturelle", "La One Health / Santé unique", "La sociobiologie", "La biogéographie"],
+    answer: 1,
+    expl: "L'approche 'One Health' (Santé unique) reconnaît que la santé humaine, animale et environnementale sont indissociables. Elle est devenue centrale dans la gestion des pandémies et des zoonoses."
+  },
+  {
+    cat: "Concepts",
+    q: "Dans l'éthique animale, qu'est-ce que le 'spécisme' ?",
+    choices: ["La classification scientifique des espèces", "La préférence arbitraire accordée à sa propre espèce au détriment des autres", "L'étude des comportements spécifiques à une espèce", "La défense de la biodiversité"],
+    answer: 1,
+    expl: "Le terme 'spécisme' a été forgé par Peter Singer par analogie avec le racisme ou le sexisme : il désigne toute discrimination fondée sur la seule appartenance à une espèce, jugée moralement injustifiable."
+  },
+  {
+    cat: "Concepts",
+    q: "Quel grand romancier russe, auteur de 'Guerre et Paix', a notamment écrit 'Kholstomer', un récit à la première personne d'un cheval, plaidant pour la dignité animale ?",
+    choices: ["Dostoïevski", "Tchekhov", "Tolstoï", "Tourgueniev"],
+    answer: 2,
+    expl: "Léon Tolstoï (1828–1910) était un ardent défenseur des droits des animaux et végétarien convaincu. Dans 'Kholstomer' (1863), un vieux cheval raconte sa vie, critiquant le concept de propriété et la cruauté humaine."
+  },
+  {
+    cat: "Éthologie",
+    q: "Les dauphins ont été observés en train d'utiliser des éponges marines comme outils de protection lors de leurs plongées. Quel terme générique désigne ce type d'apprentissage transmis entre individus d'une même espèce ?",
+    choices: ["Instinct collectif", "Culture animale", "Comportement inné", "Réflexe conditionné"],
+    answer: 1,
+    expl: "La 'culture animale' désigne des comportements appris et transmis socialement au sein d'un groupe, indépendants du génome. On l'observe chez les dauphins, les primates, les oiseaux chanteurs et même les orques."
+  },
+];
+
+const LETTERS = ['A', 'B', 'C', 'D'];
+const TOTAL = 10;
+
+let pool = [], current = 0, score = 0, answered = false, history = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  pool = shuffle(QUESTIONS).slice(0, TOTAL);
+  current = 0; score = 0; history = [];
+  show('screen-quiz');
+  buildPills();
+  renderQuestion();
+}
+
+function show(id) {
+  ['screen-start','screen-quiz','screen-result'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+}
+
+function buildPills() {
+  const container = document.getElementById('pills');
+  container.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'pill' + (i === 0 ? ' current' : '');
+    d.id = 'pill-' + i;
+    container.appendChild(d);
+  }
+}
+
+function updatePills() {
+  for (let i = 0; i < TOTAL; i++) {
+    const p = document.getElementById('pill-' + i);
+    p.className = 'pill' + (i < current ? ' done' : i === current ? ' current' : '');
+  }
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = pool[current];
+  document.getElementById('q-category').textContent = q.cat;
+  document.getElementById('q-num').textContent = `Question ${current + 1} sur ${TOTAL}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('live-score').textContent = score;
+
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'none'; fb.className = 'feedback';
+
+  const btn = document.getElementById('btn-next');
+  btn.style.display = 'none';
+  btn.textContent = current === TOTAL - 1 ? 'Voir mes résultats →' : 'Question suivante →';
+
+  const container = document.getElementById('choices');
+  container.innerHTML = '';
+  // Shuffle choices with their indices
+  const indices = shuffle([0, 1, 2, 3]);
+  indices.forEach(origIdx => {
+    const b = document.createElement('button');
+    b.className = 'choice-btn';
+    b.dataset.orig = origIdx;
+    b.innerHTML = `<span class="choice-letter">${LETTERS[indices.indexOf(origIdx)]}</span>${q.choices[origIdx]}`;
+    b.addEventListener('click', () => selectAnswer(b, origIdx, q));
+    container.appendChild(b);
+  });
+
+  updatePills();
+}
+
+function selectAnswer(btn, chosenIdx, q) {
+  if (answered) return;
+  answered = true;
+  const correct = chosenIdx === q.answer;
+  if (correct) score++;
+
+  document.querySelectorAll('.choice-btn').forEach(b => {
+    b.disabled = true;
+    const orig = parseInt(b.dataset.orig);
+    if (orig === q.answer) b.classList.add('correct');
+    else if (b === btn && !correct) b.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  const head = document.getElementById('fb-head');
+  const expl = document.getElementById('fb-expl');
+
+  fb.style.display = 'block';
+  if (correct) {
+    fb.className = 'feedback correct';
+    head.textContent = '✓ Bonne réponse !';
+  } else {
+    fb.className = 'feedback wrong';
+    head.textContent = `✗ Pas tout à fait — la bonne réponse était : « ${q.choices[q.answer]} »`;
+  }
+  expl.textContent = q.expl;
+
+  history.push({ q: q.q, correct, answer: q.choices[q.answer] });
+  document.getElementById('live-score').textContent = score;
+  document.getElementById('btn-next').style.display = 'block';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= TOTAL) { showResult(); return; }
+  renderQuestion();
+}
+
+function showResult() {
+  show('screen-result');
+  const pct = score / TOTAL;
+  let icon, title, sub, starCount;
+
+  if (pct === 1)        { icon='🏆'; title='Maître Savane !'; sub='Score parfait — tu connais les animaux et nous mieux que personne !'; starCount=3; }
+  else if (pct >= 0.7)  { icon='🌟'; title='Excellent !'; sub='Tu maîtrises bien la relation humain-animal. Encore un effort pour le score parfait !'; starCount=3; }
+  else if (pct >= 0.5)  { icon='🦁'; title='Bon explorateur !'; sub='De bonnes bases — quelques notions à consolider.'; starCount=2; }
+  else if (pct >= 0.3)  { icon='🐾'; title='En chemin…'; sub='Tu progresses ! Relis quelques définitions et retente le défi.'; starCount=1; }
+  else                  { icon='🌿'; title='La savane n\'a pas livré tous ses secrets…'; sub='Ne te décourage pas — rejoue pour progresser !'; starCount=0; }
+
+  document.getElementById('result-icon').textContent = icon;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  document.getElementById('result-score').textContent = score;
+
+  const starsEl = document.getElementById('result-stars');
+  starsEl.innerHTML = ['⭐','⭐','⭐'].map((s,i) => `<span style="opacity:${i<starCount?1:0.25}">${s}</span>`).join('');
+
+  // Update hub localStorage
+  const earned = starCount * 10;
+  const prev = parseInt(localStorage.getItem('savane-stars') || '0');
+  localStorage.setItem('savane-stars', prev + earned);
+
+  // Breakdown
+  const list = document.getElementById('breakdown-list');
+  list.innerHTML = history.map(h => `
+    <div class="breakdown-item">
+      <span class="breakdown-dot" style="background:${h.correct?'var(--correct)':'var(--wrong)'}"></span>
+      <span>${h.correct ? '✓' : '✗'} ${h.q.length > 70 ? h.q.slice(0,70)+'…' : h.q}</span>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
