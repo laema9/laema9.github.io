@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini projets</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-white text-black min-h-screen">
+
+    <header class="border-b border-black p-6 md:p-8">
+        <h1 class="text-3xl md:text-4xl">Mini projets</h1>
+    </header>
+
+    <main>
+
+        <!-- PROJETS -->
+        <section class="p-6 md:p-8">
+            <h2 class="text-2xl font-bold mb-6">Projets</h2>
+
+            <div class="flex flex-col md:flex-row gap-4">
+
+                <article class="border border-black p-4 flex-1">
+                    <h3 class="font-bold mb-2">Image random</h3>
+                    <p>Affiche des images aléatoirement à partir d'une API.</p>
+                </article>
+
+                <article class="border border-black p-4 flex-1">
+                    <h3 class="font-bold mb-2">Rien.</h3>
+                    <p>Rien.</p>
+                </article>
+
+                <article class="border border-black p-4 flex-1">
+                    <h3 class="font-bold mb-2">Horloge</h3>
+                    <p>Affiche l'heure en temps réel.</p>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- IMAGES RANDOM -->
+        <section class="p-6 md:p-8 border-b text-center">
+            <h2 class="text-2xl font-bold mb-6">Images aléatoires</h2>
+
+            <div id="imageGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+            </div>
+        </section>
+
+        <!-- HORLOGE -->
+        <section class="p-6 md:p-8 text-center">
+            <h2 class="text-2xl font-bold mb-6">Horloge numérique</h2>
+
+            <p id="clock" class="text-4xl font-mono">
+                00:00:00
+            </p>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-black p-6 md:p-8 text-center">
+        <p>2026</p>
+    </footer>
+
+    <script>
+        // IMAGES RANDOM
+        function randomImagesDisplay() {
+            const grid = document.getElementById("imageGrid");
+
+            if (grid.children.length === 0) {
+                for (let i = 0; i < 4; i++) {
+                    const img = document.createElement("img");
+                    img.className = "w-full h-auto rounded-lg";
+                    img.alt = "Image aléatoire";
+                    grid.appendChild(img);
+                }
+            }
+
+            Array.from(grid.children).forEach(img => {
+                const randomId = Math.floor(Math.random() * 1000);
+                img.src = `https://picsum.photos/seed/${Date.now() + randomId}/800/500`;
+            });
+        }
+
+        randomImagesDisplay();
+        setInterval(randomImagesDisplay, 5000);
+
+        // HORLOGE
+        function updateClock() {
+            const now = new Date();
+
+            const h = String(now.getHours()).padStart(2, "0");
+            const m = String(now.getMinutes()).padStart(2, "0");
+            const s = String(now.getSeconds()).padStart(2, "0");
+
+            document.getElementById("clock").textContent =
+                `${h}:${m}:${s}`;
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+
+</body>
+</html>
